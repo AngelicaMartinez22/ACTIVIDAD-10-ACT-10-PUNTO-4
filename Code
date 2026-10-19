@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comparación de filtros digitales</title>
+<style>
+:root{--bg:#f4f7fb;--card:#fff;--ink:#243244;--muted:#5e6c7b;--accent:#087f5b;--border:#d9e2ec}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:var(--ink);line-height:1.55}
+main{max-width:1100px;margin:30px auto;padding:0 18px}.hero{background:#103b35;color:white;padding:26px 28px;border-radius:16px;margin-bottom:18px}.hero h1{margin:0 0 8px;font-size:clamp(1.5rem,3vw,2.2rem)}.hero p{margin:4px 0;color:#e0f2ed}.card{background:var(--card);padding:22px;border:1px solid var(--border);border-radius:14px;margin:16px 0;box-shadow:0 4px 14px #2030400a}h2{font-size:1.25rem;margin:0 0 12px}h3{font-size:1rem;margin:16px 0 6px}.formula{font-family:Consolas,monospace;background:#f0f5f4;border-left:4px solid var(--accent);padding:12px 14px;border-radius:5px;overflow-wrap:anywhere}.controls{display:flex;flex-wrap:wrap;gap:12px;align-items:center}.controls label{font-weight:600}.controls input{width:90px;padding:8px;border:1px solid var(--border);border-radius:7px}.controls button{background:var(--accent);color:#fff;border:0;padding:10px 16px;border-radius:8px;cursor:pointer;font-weight:bold}.controls button:hover{filter:brightness(.92)}canvas{width:100%;height:420px;display:block}.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:.92rem}.legend span:before{content:"";display:inline-block;width:20px;height:4px;margin:0 7px 3px 0;background:var(--c)}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}.method{border:1px solid var(--border);border-radius:10px;padding:15px}.method h3{margin-top:0}.method p{margin:7px 0}.small{color:var(--muted);font-size:.92rem}.warning{background:#fff5e6;border-left:4px solid #d97706;padding:12px 14px;border-radius:6px}.tablewrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:.94rem}td,th{padding:10px;border-bottom:1px solid var(--border);text-align:left}th{background:#f0f5f4}footer{text-align:center;color:var(--muted);font-size:.85rem;padding:16px}
+</style>
+</head>
+<body>
+<main>
+<section class="hero"><h1>Comprobación de filtros digitales</h1><p>Respuesta ante un escalón unitario · Control Digital</p><p><strong>Función analógica:</strong> G(s) = s(s + 0.3) / [(s − 0.2)(s + 0.7)]</p><p><strong>Tiempo de muestreo:</strong> T = 1 segundo</p></section>
+<section class="card"><h2>1. Parámetros de simulación</h2><div class="controls"><label for="samples">Número de muestras:</label><input id="samples" type="number" min="10" max="150" value="40"><button id="update">Actualizar gráfica</button></div><p class="small">La entrada es un escalón unitario: x[k] = 1 para k ≥ 0. Las curvas se calculan con las ecuaciones en diferencias de cada modelo discreto.</p></section>
+<section class="card"><h2>2. Respuesta ante escalón unitario</h2><div class="legend"><span style="--c:#087f5b">Mapeo de polos y ceros</span><span style="--c:#2563eb">Retenedor de orden cero (ZOH)</span><span style="--c:#c2410c">Tustin</span></div><canvas id="plot" width="1000" height="420" aria-label="Gráfica comparativa de respuestas ante escalón"></canvas><p class="small">Eje horizontal: tiempo (segundos). Eje vertical: salida y[k]. La escala vertical puede ampliarse cuando la respuesta diverge.</p></section>
+<section class="card"><h2>3. Funciones de transferencia discretas</h2><div class="grid">
+<div class="method"><h3>a) Mapeo de polos y ceros</h3><div class="formula">Gₐ(z) = (z − 1)(z − 0.740818) / [(z − 1.221403)(z − 0.496585)]</div><p class="small">Se mapean las raíces usando z = e^(sT). Como la ganancia en alta frecuencia de G(s) es 1, se conserva ganancia unitaria.</p></div>
+<div class="method"><h3>b) Retenedor de orden cero (ZOH)</h3><div class="formula">Gᵦ(z) = (0.934636 z − 0.695799) / (z² − 1.717988 z + 0.606531)</div><p class="small">Conversión exacta para una entrada mantenida constante entre muestras.</p></div>
+<div class="method"><h3>c) Tustin</h3><div class="formula">G𝒸(z) = (0.473251 z² + 0.123457 z − 0.349794) / (z² − 1.703704 z + 0.588477)</div><p class="small">Se sustituye s por (2/T)(z − 1)/(z + 1), con T = 1 s.</p></div>
+</div></section>
+<section class="card"><h2>4. Ecuaciones en diferencias usadas</h2><div class="tablewrap"><table><thead><tr><th>Método</th><th>Ecuación en diferencias</th></tr></thead><tbody>
+<tr><td>Mapeo de polos y ceros</td><td>y[k] = 1.717988y[k−1] − 0.606531y[k−2] + x[k] − 1.740818x[k−1] + 0.740818x[k−2]</td></tr>
+<tr><td>ZOH</td><td>y[k] = 1.717988y[k−1] − 0.606531y[k−2] + 0.934636x[k−1] − 0.695799x[k−2]</td></tr>
+<tr><td>Tustin</td><td>y[k] = 1.703704y[k−1] − 0.588477y[k−2] + 0.473251x[k] + 0.123457x[k−1] − 0.349794x[k−2]</td></tr>
+</tbody></table></div></section>
+<section class="card"><h2>5. Interpretación</h2><p>Las tres respuestas deben analizarse considerando los polos de cada sistema discreto. El polo analógico en s = 0.2 se transforma, mediante mapeo exponencial, en z = e^0.2 ≈ 1.2214, que está fuera del círculo unitario. En Tustin se transforma en z ≈ 1.2222, también fuera del círculo unitario. Por ello, las respuestas de esos métodos divergen ante el escalón.</p><p>El método ZOH conserva los polos continuos bajo el mapeo exponencial, por lo que también incluye un polo fuera del círculo unitario. Las diferencias iniciales entre las curvas se deben al método de discretización; la tendencia creciente se relaciona con la inestabilidad del sistema original.</p><div class="warning"><strong>Nota para el reporte:</strong> no esperes que las tres curvas coincidan exactamente. Los métodos generan modelos discretos diferentes. La comparación verifica sus respuestas y permite observar tanto las diferencias como la inestabilidad heredada del sistema analógico.</div></section>
+<footer>Simulador educativo autónomo · No requiere instalar software ni bibliotecas externas.</footer>
+</main>
+<script>
+const methods=[
+ {name:'Mapeo de polos y ceros',color:'#087f5b',b:[1,-1.740818,0.740818],a:[1,-1.717988,0.606531]},
+ {name:'ZOH',color:'#2563eb',b:[0,0.934636,-0.695799],a:[1,-1.717988,0.606531]},
+ {name:'Tustin',color:'#c2410c',b:[0.473251,0.123457,-0.349794],a:[1,-1.703704,0.588477]}
+];
+function response(m,N){let x=Array(N).fill(1),y=Array(N).fill(0);for(let k=0;k<N;k++){let v=0;for(let j=0;j<m.b.length;j++)if(k-j>=0)v+=m.b[j]*x[k-j];for(let j=1;j<m.a.length;j++)if(k-j>=0)v-=m.a[j]*y[k-j];y[k]=v/m.a[0];if(!Number.isFinite(y[k]))y[k]=NaN;}return y;}
+function draw(){let N=Math.max(10,Math.min(150,parseInt(document.getElementById('samples').value)||40));let canvas=document.getElementById('plot'),ctx=canvas.getContext('2d');let W=canvas.width,H=canvas.height,L=70,R=22,T=22,B=48,pw=W-L-R,ph=H-T-B;ctx.clearRect(0,0,W,H);let series=methods.map(m=>({m,y:response(m,N)}));let vals=series.flatMap(s=>s.y.filter(Number.isFinite)).filter(v=>Math.abs(v)<1e7);let max=Math.max(1,...vals),min=Math.min(-0.2,...vals);if(max>100)max=Math.ceil(max/10)*10;if(min< -100)min=-Math.ceil(Math.abs(min)/10)*10;let pad=(max-min)*.08||1;max+=pad;min-=pad;const X=k=>L+k/(N-1)*pw,Y=v=>T+(max-v)/(max-min)*ph;
+ctx.font='12px Arial';ctx.strokeStyle='#e1e8ef';ctx.fillStyle='#526273';ctx.lineWidth=1;for(let i=0;i<=5;i++){let v=min+(max-min)*i/5,yy=Y(v);ctx.beginPath();ctx.moveTo(L,yy);ctx.lineTo(W-R,yy);ctx.stroke();ctx.textAlign='right';ctx.fillText(v.toPrecision(3),L-9,yy+4);}let xticks=Math.min(8,N-1);for(let i=0;i<=xticks;i++){let k=Math.round((N-1)*i/xticks),xx=X(k);ctx.beginPath();ctx.moveTo(xx,T);ctx.lineTo(xx,H-B);ctx.stroke();ctx.textAlign='center';ctx.fillText(k,xx,H-B+20);}ctx.strokeStyle='#738294';ctx.beginPath();ctx.moveTo(L,T);ctx.lineTo(L,H-B);ctx.lineTo(W-R,H-B);ctx.stroke();ctx.fillStyle='#243244';ctx.textAlign='center';ctx.font='13px Arial';ctx.fillText('Muestra k (T = 1 s)',L+pw/2,H-8);ctx.save();ctx.translate(18,T+ph/2);ctx.rotate(-Math.PI/2);ctx.fillText('Salida y[k]',0,0);ctx.restore();
+for(const s of series){ctx.strokeStyle=s.m.color;ctx.lineWidth=2.5;ctx.beginPath();let started=false;for(let k=0;k<N;k++){let v=s.y[k];if(!Number.isFinite(v)||Math.abs(v)>Math.max(Math.abs(min),Math.abs(max))*1.4){started=false;continue;}let xx=X(k),yy=Y(v);if(!started){ctx.moveTo(xx,yy);started=true;}else ctx.lineTo(xx,yy);}ctx.stroke();}if(vals.length===0){ctx.fillStyle='#243244';ctx.fillText('No hay valores finitos para mostrar',W/2,H/2);}}
+document.getElementById('update').addEventListener('click',draw);document.getElementById('samples').addEventListener('change',draw);draw();
+</script>
+</body>
+</html>
